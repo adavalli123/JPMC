@@ -72,7 +72,7 @@ class MainVC: UIViewController {
     }
     
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        if inSearchSong {
+        if searchController.active && searchController.searchBar.text != "" {
             self.performSegueWithIdentifier("showDetail", sender: searchSong.items[indexPath.row])
         }
         else {

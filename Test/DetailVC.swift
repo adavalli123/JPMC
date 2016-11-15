@@ -15,6 +15,8 @@ class DetailVC : UIViewController {
     @IBOutlet weak var fullImage: UIImageView!
     
     var item: Items!
+    var lyric: Lyric!
+    var itemName: String?
     
     override func viewDidLoad() {
         config(item)
@@ -40,5 +42,32 @@ class DetailVC : UIViewController {
         titleLabel.sizeToFit()
         self.navigationItem.titleView = titleLabel
     }
+    
+//    func parserDidStartDocument(parser: NSXMLParser) {
+//        items = []
+//    }
+    
+    func parser(parser: NSXMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String : String]) {
+        if elementName == "item" {
+            itemName = ""
+        }
+    }
+    
+    func parser(parser: NSXMLParser, foundCharacters string: String) {
+        itemName?.appendContentsOf(string)
+    }
+    
+    func parser(parser: NSXMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName qName: String?) {
+        if elementName == "item" {
+            lyric.lyric = itemName
+            itemName = nil
+        }
+    }
+}
 
+struct Lyric {
+    var lyric: String?
+    init(lyric: String) {
+        self.lyric = lyric
+    }
 }
