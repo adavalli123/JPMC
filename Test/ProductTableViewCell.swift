@@ -17,8 +17,8 @@ class ProductTableViewCell: UITableViewCell {
     
     func configure(items: Items) {
         self.productImage.image = items.stringToImage("\(items.artworkUrl100!)")
-        self.prodName.text = "Tack Name : \(items.trackName!)"
-        self.prodColor.text = "Artist Name : \(items.artistName!)"
+        self.prodName.text = items.trackName
+        self.prodColor.text = items.artistName
         self.prodPrice.text = items.collectionName
     }
 }

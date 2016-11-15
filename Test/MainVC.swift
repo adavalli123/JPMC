@@ -8,21 +8,27 @@
 
 import UIKit
 
-class MainVC: UIViewController, UISearchBarDelegate {
+class MainVC: UIViewController {
     
     @IBOutlet weak var tableView: UITableView!
-    @IBOutlet weak var searchBar: UISearchBar!
+    @IBOutlet var searchBar: UISearchBar!
+    let searchController = UISearchController(searchResultsController: nil)
+    
     
     var product: Product!
-    var searchSong: Product!
+    var searchSong = Product(items: [])
     var inSearchSong = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.tableFooterView = UIView()
         navigationCustomeTitle(UIColor.redColor(), title: "HOME", fontSize: 28.0)
-        searchBar.delegate = self
-        searchBar.returnKeyType = UIReturnKeyType.Done
+        //        searchBar.delegate = self
+        //        searchBar.returnKeyType = UIReturnKeyType.Done
+        searchController.dimsBackgroundDuringPresentation = false
+        searchController.searchResultsUpdater = self
+        definesPresentationContext = true
+        tableView.tableHeaderView = searchController.searchBar
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -32,23 +38,37 @@ class MainVC: UIViewController, UISearchBarDelegate {
         tableView.reloadData()
     }
     
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if inSearchSong {
-            searchSong.items.count
+    func filterContentForSearchText(searchText:String, scope: String = "All")
+    {
+        searchSong.items = product.items!.filter{ item in
+            return item.trackName!.lowercaseString.containsString(searchText.lowercaseString)
+            
         }
-        return product.items.count
+        tableView.reloadData()
+    }
+    
+    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        if searchController.active && searchController.searchBar.text != ""
+        {
+            return searchSong.items.count
+        }
+        
+        return self.product.items?.count ?? 0
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("TableViewCellIdentifier",forIndexPath: indexPath) as? ProductTableViewCell
+        guard let cell = tableView.dequeueReusableCellWithIdentifier("TableViewCellIdentifier",
+                                                                     forIndexPath: indexPath) as? ProductTableViewCell else {
+                                                                        return UITableViewCell() }
         
-        if inSearchSong {
-            cell?.configure(searchSong.items[indexPath.row])
+        if searchController.active && searchController.searchBar.text != ""
+        {
+            cell.configure(searchSong.items[indexPath.row])
         }
         else {
-            cell!.configure(product.items[indexPath.row])
+            cell.configure(product.items[indexPath.row])
         }
-        return cell!
+        return cell
     }
     
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
@@ -73,6 +93,26 @@ class MainVC: UIViewController, UISearchBarDelegate {
         }
     }
     
+    func searchBarSearchButtonClicked(searchBar: UISearchBar) {
+        view.endEditing(true)
+    }
+    
+    func searchBar(searchBar: UISearchBar, textDidChange searchText: String) {
+        
+        if searchBar.text == nil || searchBar.text == ""
+        {
+            inSearchSong = false
+            view.endEditing(true)
+            tableView.reloadData()
+        }
+        else {
+            inSearchSong = true
+            let searchText = searchBar.text!.lowercaseString
+            searchSong.items =  product.items.filter( { $0.artistName!.rangeOfString(searchText) != nil })
+            tableView.reloadData()
+        }
+    }
+    
     private func navigationCustomeTitle(color: UIColor, title: String, fontSize: CGFloat) {
         let titleLabel = UILabel()
         let attributes: [String : AnyObject] = [NSFontAttributeName: UIFont.boldSystemFontOfSize(fontSize), NSForegroundColorAttributeName: color, NSKernAttributeName : 5.0]
@@ -82,3 +122,9 @@ class MainVC: UIViewController, UISearchBarDelegate {
     }
 }
 
+extension MainVC: UISearchResultsUpdating
+{
+    func updateSearchResultsForSearchController(searchController: UISearchController) {
+        filterContentForSearchText(searchController.searchBar.text!)
+    }
+}
