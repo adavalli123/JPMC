@@ -7,25 +7,33 @@
 //
 
 import UIKit
-class DetailVC : UIViewController {
+class DetailVC : UIViewController, NSXMLParserDelegate {
     
     @IBOutlet weak var prodTitle: UILabel!
     @IBOutlet weak var prodColor: UILabel!
     @IBOutlet weak var prodPrice: UILabel!
     @IBOutlet weak var fullImage: UIImageView!
+    @IBOutlet var lyricLabel: UILabel!
     
     var item: Items!
     var lyric: Lyric!
-    var itemName: String?
+    var itemName: String = ""
+    var parser = NSXMLParser()
+    var requestProvider: RequestProvider!
     
     override func viewDidLoad() {
         config(item)
         navigationCustomeTitle(UIColor.redColor(), title: "DETAIL", fontSize: 28.0)
+        let url = requestProvider.createURLWithComponents(item)
+        parser.delegate = self
+        parser = NSXMLParser(contentsOfURL: (url?.URL)!)!
+        parser.parse()
+        lyricLabel.text! = itemName
     }
     
     override func viewWillAppear(animated: Bool) {
         super.viewDidAppear(animated)
-//        self.navigationItem.setHidesBackButton(false, animated: false)
+        //        self.navigationItem.setHidesBackButton(false, animated: false)
     }
     
     private func config(item: Items) {
@@ -43,10 +51,6 @@ class DetailVC : UIViewController {
         self.navigationItem.titleView = titleLabel
     }
     
-//    func parserDidStartDocument(parser: NSXMLParser) {
-//        items = []
-//    }
-    
     func parser(parser: NSXMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String : String]) {
         if elementName == "item" {
             itemName = ""
@@ -54,20 +58,26 @@ class DetailVC : UIViewController {
     }
     
     func parser(parser: NSXMLParser, foundCharacters string: String) {
-        itemName?.appendContentsOf(string)
+        itemName.appendContentsOf(string)
     }
     
     func parser(parser: NSXMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName qName: String?) {
         if elementName == "item" {
             lyric.lyric = itemName
-            itemName = nil
+            itemName = ""
         }
+    }
+    
+    func parser(parser: NSXMLParser, parseErrorOccurred parseError: NSError) {
+        print("failure error: ", parseError)
     }
 }
 
 struct Lyric {
     var lyric: String?
-    init(lyric: String) {
+    var url: String?
+    init(lyric: String, url: String) {
         self.lyric = lyric
+        self.url  = url
     }
 }

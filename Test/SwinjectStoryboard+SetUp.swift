@@ -21,6 +21,7 @@ extension SwinjectStoryboard {
         }
         
         defaultContainer.registerForStoryboard(DetailVC.self) { resolver, controller in
+            controller.requestProvider = resolver.resolve(RequestProvider.self)!
         }
         
         // Services

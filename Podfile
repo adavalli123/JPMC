@@ -10,7 +10,6 @@ target 'Test' do
     pod 'MBProgressHUD'
     pod 'SwiftyJSON'
     pod 'JHSpinner'
-    #pod 'SWXMLHash', '~> 3.0.0'
     pod 'MGSwipeTableCell'
 end
 

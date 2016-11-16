@@ -6,7 +6,7 @@
 //  Copyright © 2016 Srikanth Adavalli. All rights reserved.
 //
 
-import Quick
+//import Quick
 import Swinject
 
 class SwinjectSpec: QuickSpec {
